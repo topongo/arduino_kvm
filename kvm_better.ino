@@ -67,6 +67,80 @@ void send_simple_char(char c) {
   }
 }
 
+void special_hook() {
+  Serial.println("Enter special key sequence:");
+  Serial.println("  0. Exit");
+  Serial.println("  1. Ctrl-Alt-Del (h)");
+  Serial.println("  2. Ctrl-Win-Del (p)");
+  Serial.println("  3. Win-D (d)");
+  Serial.println("  4. Win-Shift+q (q)");
+  Serial.println("  5. Ctrl-Shift-Esc (e)");
+  Serial.println("  6. CapsLock (c)");
+  Serial.println("  7. Ctrl-Alt-F* (f)");
+  
+  int inp = 0;
+  while(!Serial.available());
+  switch(Serial.read()) {
+    case 'h':
+    case '1':
+      Keyboard.press(KEY_LEFT_CTRL);
+      Keyboard.press(KEY_LEFT_ALT);
+      Keyboard.press(KEY_DELETE);
+      Keyboard.releaseAll();
+      break;
+    case 'p':
+    case '2':
+      Keyboard.press(KEY_LEFT_CTRL);
+      Keyboard.press(KEY_LEFT_GUI);
+      Keyboard.press(KEY_DELETE);
+      Keyboard.releaseAll();
+      break;
+    case 'd':
+    case '3':
+      Keyboard.press(KEY_LEFT_GUI);
+      Keyboard.press('d');
+      Keyboard.releaseAll();
+      break;
+    case 'q':
+    case '4':
+      Keyboard.press(KEY_LEFT_GUI);
+      Keyboard.press(KEY_LEFT_SHIFT);
+      Keyboard.press('q');
+      Keyboard.releaseAll();
+      break;
+    case 'e':
+    case '5':
+      Keyboard.press(KEY_LEFT_CTRL);
+      Keyboard.press(KEY_LEFT_SHIFT);
+      Keyboard.press(KEY_ESC);
+      Keyboard.releaseAll();
+      break;
+    case 'c':
+    case '6':
+      Keyboard.press(KEY_CAPS_LOCK);
+      Keyboard.release(KEY_CAPS_LOCK);
+      break;
+    case 'F':
+    case 'f':
+    case '7':
+      Serial.print("Enter F key: ");
+      while(!Serial.available());
+      inp = Serial.parseInt();
+      if(inp >= 1 && inp <= 12) {
+        Keyboard.press(KEY_LEFT_CTRL);
+        Keyboard.press(KEY_LEFT_ALT);
+        Keyboard.press(KEY_F1 + inp - 1);
+        Keyboard.releaseAll();
+      } else {
+        Serial.println("Invalid F key");
+      }
+      break;
+    default:
+      Serial.println("Invalid option");
+      break;
+  }
+}
+
 void loop() {
     if (pos > 0 && millis() - last > 5) {
       // detect, dump and reset sequence
@@ -179,7 +253,7 @@ void loop() {
                     Keyboard.release(KEY_F4);
                     break;
                 }
-                break;
+               break;
               default:
                 if(pos == 2) {
                   Keyboard.press(KEY_LEFT_ALT);
@@ -210,6 +284,7 @@ void loop() {
 
     if (Serial.available() > 0) {
         char c = Serial.read();
+        if (c == '\x1c') return special_hook();
         if (pos == 0 || millis() - last < 5) {
             if(pos == SEQ_MAX) {
 	    	Serial.println("==> Warning more than SEQ_LIMIT characters sent!");
