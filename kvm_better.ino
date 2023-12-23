@@ -145,15 +145,19 @@ void loop() {
     if (pos > 0 && millis() - last > 5) {
       // detect, dump and reset sequence
       if(pos == 1) {
+#ifdef DEBUG
         Serial.println("sending simple char");
         print_char(seq[0]);
         Serial.println();
+#endif
         send_simple_char(seq[0]);
       } else {
+#ifdef DEBUG
         for(int i = 0; i < pos; i++) {
           print_char(seq[i]);
           Serial.print(" ");
         }
+#endif
         Serial.println();
         switch (seq[0]) {
           case '\x1b':
